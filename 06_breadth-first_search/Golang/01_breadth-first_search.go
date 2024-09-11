@@ -1,12 +1,17 @@
 package main
 
-func person_is_seller(name string) bool {
+import "fmt"
+
+// isSeller returns true if person's name ends with "m"
+func isSeller(name string) bool {
 	return name[len(name)-1] == 'm'
 }
 
+// Initialize new graph
 var graph = make(map[string][]string)
 
 func main() {
+	// Populate graph with friends
 	graph["you"] = []string{"alice", "bob", "claire"}
 	graph["bob"] = []string{"anuj", "peggy"}
 	graph["alice"] = []string{"peggy"}
@@ -16,36 +21,31 @@ func main() {
 	graph["thom"] = []string{}
 	graph["jonny"] = []string{}
 
+	// Search for seller among your friends
 	search("you")
 }
 
+// search returns true if a seller is found among friends (or friends of friends) of the given person.
+// It also prints the name of the seller to the console.
 func search(name string) bool {
-	var search_queue []string
-	search_queue = append(search_queue, graph[name]...)
-	var searched []string
+	var searchQueue []string
+	searchQueue = append(searchQueue, graph[name]...)
+	// This is how you keep track of which people you've searched before.
+	searched := make(map[string]bool)
 	var person string
-	for len(search_queue) != 0 {
-		person = search_queue[0]
-		search_queue = search_queue[1:]
-		if person_not_in_searched(person, searched) {
-			if person_is_seller(person) {
-				println(person + " is mango seller!")
+	for len(searchQueue) != 0 {
+		person = searchQueue[0]
+		searchQueue = searchQueue[1:]
+		// Only search this person if you haven't already searched them.
+		if !searched[person] {
+			if isSeller(person) {
+				fmt.Println(person, "is mango seller!")
 				return true
 			}
-
-			search_queue = append(search_queue, graph[person]...)
-			searched = append(searched, person)
-
+			searchQueue = append(searchQueue, graph[person]...)
+			// Marks this person as searched.
+			searched[person] = true
 		}
 	}
 	return false
-}
-
-func person_not_in_searched(person string, searched []string) bool {
-	for _, n := range searched {
-		if n == person {
-			return false
-		}
-	}
-	return true
 }
